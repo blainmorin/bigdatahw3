@@ -8,7 +8,7 @@ require(tibble) == T || install.packages("tibble")
 require(dplyr) == T || install.packages("dplyr")
 require(caret) == T || install.packages("caret")
 require(doParallel) || install.packages("doParallel")
-
+require(readr) == T || install.packages("readr")
 
 authors <- function() {
   c("Blain Morin")
@@ -19,6 +19,7 @@ authors <- function() {
 ################################################
 
 library(doParallel)
+library(readr)
 library(RSQLite)
 library(tibble)
 library(caret)
@@ -157,7 +158,7 @@ output2 = foreach(i = 1:ncol(outcomes), .combine = cbind, .packages = "caret") %
 output2 = data.frame(id = missing.id, output2)
 names(output2)[2:19] = names(outcome.table)[2:19]
 
-write.csv(output2, file = "outcome2.csv")
+write.csv(output2, file = "output2.csv")
 
 
 
@@ -165,14 +166,55 @@ write.csv(output2, file = "outcome2.csv")
 #### Question 4 ##############################
 ##################################
 
+pred2 = read_csv("pred2.csv", col_names = FALSE)
+
+## Add new predictors to data
+names(pred2)[1] = "id"
+
+data.q4 = inner_join(all.id, pred.table)
+data.q4 = inner_join(data.q4, demo.table, by = "id")
+data.q4 = inner_join(data.q4, pred2, by = "id")
+data.q4 = inner_join(data.q4, outcome.table, by = "id")
+data.q4$gender = ifelse(data.q4$gender == "F", 1, 0)
+data.q4$age = as.numeric(data.q4$age)
+data.q4 = as.matrix(data.q4)
 
 
 
+##Prepare our data for prediction
+p.q4 = inner_join(missing.id, pred.table)
+p.q4 = inner_join(p.q4, demo.table, by = "id")
+p.q4 = inner_join(p.q4, pred2, by = "id")
+p.q4$gender = ifelse(p.q4$gender == "F", 1, 0)
+p.q4$age = as.numeric(p.q4$age)
+p.q4 = as.matrix(p.q4)
 
 
+## Create outcome matrix
+outcomes = data.q2[ , 109:126]
 
 
+## Create list of parameters to check
+parameter.values.q4 = expand.grid(alpha = seq(0,1, by = .5), lambda = 10^seq(3, -3, length.out = 300))
 
+
+## Train on each outcome and predict
+output3 = foreach(i = 1:ncol(outcomes), .combine = cbind, .packages = "caret") %dopar% {
+  
+  lasso = train(data.q4[ , 2:307], y = outcomes[ , i],
+                method = "glmnet", tuneGrid = parameter.values.q4)
+  lasso.predictions = predict.train(lasso, newdata = p.q4[ , 2:307])
+  
+  
+}
+
+### Prepare for export
+output3 = data.frame(id = missing.id, output3)
+names(output3)[2:19] = names(outcome.table)[2:19]
+
+write.csv(output3, file = "output3.csv")
+
+## Yes, the added predictors decreased RMSE.
 
 
 

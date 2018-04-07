@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Instructor: Xi Luo" />
+  <title>Stat Learning and Big Data: Homework 3</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+  body {
+      margin: auto;
+      padding-right: 1em;
+      padding-left: 1em;
+      max-width: 44em; 
+      border-left: 1px solid black;
+      border-right: 1px solid black;
+      color: black;
+      font-family: Verdana, sans-serif;
+      font-size: 100%;
+      line-height: 140%;
+      color: #333; 
+  }
+  pre {
+      border: 1px dotted gray;
+      background-color: #ececec;
+      color: #1111111;
+      padding: 0.5em;
+  }
+  code {
+      font-family: monospace;
+  }
+  h1 a, h2 a, h3 a, h4 a, h5 a { 
+      text-decoration: none;
+      color: #7a5ada; 
+  }
+  h1, h2, h3, h4, h5 { font-family: verdana;
+                       font-weight: bold;
+                       border-bottom: 1px dotted black;
+                       color: #7a5ada; }
+  h1 {
+          font-size: 130%;
+  }
+  
+  h2 {
+          font-size: 110%;
+  }
+  
+  h3 {
+          font-size: 95%;
+  }
+  
+  h4 {
+          font-size: 90%;
+          font-style: italic;
+  }
+  
+  h5 {
+          font-size: 90%;
+          font-style: italic;
+  }
+  
+  h1.title {
+          font-size: 200%;
+          font-weight: bold;
+          padding-top: 0.2em;
+          padding-bottom: 0.2em;
+          text-align: left;
+          border: none;
+  }
+  
+  dt code {
+          font-weight: bold;
+  }
+  dd p {
+          margin-top: 0;
+  }
+  
+  #footer {
+          padding-top: 1em;
+          font-size: 70%;
+          color: gray;
+          text-align: center;
+  }
+  </style>
+</head>
+<body>
+<div id="header">
+<h1 class="title">Stat Learning and Big Data: Homework 3</h1>
+<h2 class="author">Instructor: Xi Luo</h2>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#instructions-on-submitting-your-solution">Instructions on Submitting Your Solution</a></li>
+<li><a href="#predicting-cognitive-scores">Predicting Cognitive Scores</a></li>
+</ul>
+</div>
+<hr />
+<p><strong>Instructions</strong></p>
+<ul>
+<li>Deadline: <strong>11:59 pm, March 31, 2018</strong> on Canvas.</li>
+<li>Please start working on this early, even though the deadline is in two weeks. It is hard to predict what kind of bugs will come up!</li>
+<li>You are allowed (also encouraged) to work in teams. Each team can have any number of members.</li>
+<li>Each team should submit only one solution, with all the team members clearly listed.</li>
+<li>The members of each team may self sign-up the project groups on Canvas. Please let me know if it does not work.</li>
+<li>You are encouraged to seek help from the instructor.</li>
+<li>Please submit your codes only (R or other languages). Please do not submit the data unless required by the problem.</li>
+<li>Please submit your solution to Canvas online. Note that the online submission will be closed automatically after the deadline, and <em>no late submissions will be allowed</em>. Before the deadline, you may submit replacements.</li>
+</ul>
+<hr />
+<h1 id="instructions-on-submitting-your-solution">Instructions on Submitting Your Solution</h1>
+<ul>
+<li>Your solution will be evaluated by <em>accuracy</em>, <em>running time</em>, and <em>code length</em> (number of characters), on a linux machine with 8g memory and 4 cores.</li>
+<li>If you script requires loading libraries, please include lines to install libraries.</li>
+<li>You should also include a function “<strong>authors()</strong>”, which returns a vector of names for all team members. We will use these names to record your grades!</li>
+<li>Only your program is required for submission. You do not need to submit the output data or results.</li>
+<li>Your program should be able to run within the same folder that contains all the input data files.</li>
+</ul>
+<h1 id="predicting-cognitive-scores">Predicting Cognitive Scores</h1>
+<p>This assignment aims to help you practice various principals and technologies for prediction.</p>
+<p>This assignment also means to illustrate the complexity in real-world practice. One may need to integrate in modeling multiple sources of data, scattered in multiple tables. In fact, many enterprise SQL databases usually contain many tables, and that’s the usual way how data are organized to optimize logistic flow and storage efficiency. The complication for modeling is that these tables do not necessarily contain the same IDs, and some will be missing in one or a few tables.</p>
+<p>The basic dataset is in a sqlite database: pred.sqlite on Canvas. This dataset contains 3 tables: <strong>pred</strong>, <strong>demo</strong>, and <strong>outcome</strong>. The first column of each table is the unique ID for each subject, and the remaining collumns are variables that be used for model building. The practical goal is to predict cognitive scores (in the outcome table) using other variables.</p>
+<ol style="list-style-type: decimal">
+<li>[10%] Find the IDs that are available in all tables, and the IDs that available only in Table <strong>pred</strong> and <strong>demo</strong> but not in Table <strong>outcome</strong>.
+<ul>
+<li>Output two csv files: <strong>idall.csv</strong> should contain a vector of IDs in all tables, and <strong>idmissing.csv</strong> should contain a vector of IDs that are missing in Table <strong>outcome</strong>.</li>
+</ul></li>
+<li>[30%] Build a model for predicting the first outcome score (the second column in Table <strong>outcome</strong>), using the data from the first ID list in Problem 1. Generate the corresponding predicted values using your model for the missing IDs in Problem 1.
+<ul>
+<li>Output one csv file: <strong>output1.csv</strong> should contain one matrix element. The first column of this matrix is the second ID list from Problem 1 and the second column is the predicted values generated by your model. We will compare your predicted values with the measured values withheld from you, using the measn squared error loss.</li>
+</ul></li>
+<li>[30%] Similar to problem 2, generate predicted values for all outcome columns in the Table <strong>outcome</strong>, including the first column that you did in Problem 2.
+<ul>
+<li>Output one csv file: <strong>output2.csv</strong> should contain one matrix element. The first column of this matrix is the second ID list from Problem 1, and the remaining columns are the predicted values generated by your model, by the same order as in Table <strong>outcome</strong>.</li>
+</ul></li>
+<li>[30%] Do more data help improve the prediction performance? Additional predictors are available from the CSV file pred2.csv on Canvas. The first column is the IDs and the remainding ones are additional predictors. Carry out similar steps as before to build your predictive models for all outcomes, using these additional predictors.
+<ul>
+<li>Output one csv file: <strong>output3.csv</strong> should contain one matrix element, similar to Problem 3, for predicting the multiple scores.</li>
+</ul></li>
+<li>[Bonus 30%] Can a really large number of predictors help improve the prediction accuracy? Similar to Problem 4, please consider including additional predictors from pred3.csv from https://www.dropbox.com/s/8pv2z9l4bccityn/pred3.csv?dl=0 or <a href="https://www.dropbox.com/s/8pv2z9l4bccityn/pred3.csv?dl=0">here</a>
+<ul>
+<li>Output one csv file: <strong>output4.csv</strong> should contain one matrix element, similar to Problem 4, for predicting the multiple scores using this larger dataset.</li>
+</ul></li>
+</ol>
+</body>
+</html>
