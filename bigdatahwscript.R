@@ -9,6 +9,7 @@ require(dplyr) == T || install.packages("dplyr")
 require(caret) == T || install.packages("caret")
 require(doParallel) || install.packages("doParallel")
 require(readr) == T || install.packages("readr")
+require(data.table) == T || install.packages("data.table")
 
 authors <- function() {
   c("Blain Morin")
@@ -25,6 +26,7 @@ library(tibble)
 library(caret)
 library(RSQLite)
 library(tibble)
+library(data.table)
 library(dplyr)
 
 db = dbConnect(SQLite(), dbname="pred.sqlite")
@@ -219,11 +221,43 @@ write.csv(output3, file = "output3.csv")
 
 
 
+###############################################################
+#### Bonus Question 5 #############################
+########################################
+
+## Set up train data
+pred3 = fread("pred3.csv")
+
+names(pred3)[1] = "id"
+
+data.q5 = inner_join(all.id, pred.table)
+data.q5 = inner_join(data.q5, demo.table, by = "id")
+data.q5 = inner_join(data.q5, pred2, by = "id")
+data.q5 = inner_join(data.q5, pred3, by = "id")
+data.q5 = inner_join(data.q5, outcome.table, by = "id")
+data.q5$gender = ifelse(data.q5$gender == "F", 1, 0)
+data.q5$age = as.numeric(data.q5$age)
+data.q5 = as.matrix(data.q5)
+
+## Prepare our data for prediction
+p.q5 = inner_join(missing.id, pred.table)
+p.q5 = inner_join(p.q5, demo.table, by = "id")
+p.q5 = inner_join(p.q5, pred2, by = "id")
+p.q5 = inner_join(p.q5, pred3, by = "id")
+p.q5$gender = ifelse(p.q5$gender == "F", 1, 0)
+p.q5$age = as.numeric(p.q5$age)
+p.q5 = as.matrix(p.q5)
 
 
 
-
-
-
+output4 = foreach(i = 1:ncol(outcomes), .combine = cbind, .packages = "glmnet") %dopar% {
+  
+  reg = cv.glmnet(x = data.q5[ , 2:45157], y = outcomes[ , i],
+               alpha = 1)
+  
+  pre = predict(glmnet, p.q5[, 2:45157], s = reg$lambda.min)
+  
+  
+}
 
 
