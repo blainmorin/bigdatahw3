@@ -10,6 +10,7 @@ require(caret) == T || install.packages("caret")
 require(doParallel) || install.packages("doParallel")
 require(readr) == T || install.packages("readr")
 require(data.table) == T || install.packages("data.table")
+require(glmnet) == T || install.packages("glmnet")
 
 authors <- function() {
   c("Blain Morin")
@@ -255,9 +256,12 @@ output4 = foreach(i = 1:ncol(outcomes), .combine = cbind, .packages = "glmnet") 
   reg = cv.glmnet(x = data.q5[ , 2:45157], y = outcomes[ , i],
                alpha = 1)
   
-  pre = predict(glmnet, p.q5[, 2:45157], s = reg$lambda.min)
+  pre = predict(reg, p.q5[, 2:45157], s = reg$lambda.min)
   
   
 }
 
+output4 = data.frame(id = missing.id, output4)
+names(output4)[2:19] = names(outcome.table)[2:19]
 
+write.csv(output4, file = "output3.csv")
